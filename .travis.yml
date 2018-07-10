@@ -6,6 +6,7 @@ env:
      - CONAN_CHANNEL: "stable"
      - CONAN_UPLOAD: "https://api.bintray.com/conan/darcamo/cppsim"
      - CONAN_BUILD_POLICY: "outdated"
+     - CONAN_ARCHS: "x86_64"
 
 linux: &linux
    os: linux
