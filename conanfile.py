@@ -107,29 +107,33 @@ class ArmadilloConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib", "lib64"]
+        self.cpp_info.libs = ["armadillo"]
+        # self.cpp_info.defines.append("ARMA_DONT_USE_WRAPPER")
 
-        self.cpp_info.defines.append("ARMA_DONT_USE_WRAPPER")
-
+        # Note that in case that system libs is set to True then HDF5 will be
+        # enabled if HDF5 library is installed. When it is not to true, then
+        # HDF5 from conan is used, but since armadillo CMakeLists does not
+        # detect this we need to manually enable HDF5 usage.
         if not self.options.use_system_libs:
             # Since we are using a dependency from conan instead of a system
             # dependency, the armadillos cmake won't find the HDF5 library, but
             # we are including it. Let's tell armadillo to actually use it.
             self.cpp_info.defines.append("ARMA_USE_HDF5")
 
-        # In case we are linking with the system HDF5 library and we are in
-        # ubuntu, we need to add the folder where the HDF5 library can be
-        # found. Note that other distros such as Arch put the HDF5 library in
-        # the standard /usr/lib folder.
-        if tools.os_info.linux_distro == "ubuntu" and self.options.use_system_libs:
-            self.cpp_info.libdirs.append("/usr/lib/x86_64-linux-gnu/hdf5/serial")
+        # # In case we are linking with the system HDF5 library and we are in
+        # # ubuntu, we need to add the folder where the HDF5 library can be
+        # # found. Note that other distros such as Arch put the HDF5 library in
+        # # the standard /usr/lib folder.
+        # if tools.os_info.linux_distro == "ubuntu" and self.options.use_system_libs:
+        #     self.cpp_info.libdirs.append("/usr/lib/x86_64-linux-gnu/hdf5/serial")
 
-        # self.cpp_info.libs = ["armadillo"]
+        # # self.cpp_info.libs = ["armadillo"]
 
-        # For static libraries the wrapper does not seem to really work and we
-        # endup having to link with the other libraries
-        # if not self.options.shared:
-        if self.options.use_system_libs:
-            self.cpp_info.libs.extend(["hdf5", "lapack", "blas"])
-        else:
-            # Note that the lapack library from darcamo/stable already links with openblas
-            self.cpp_info.libs.extend(["hdf5", "lapack"])
+        # # For static libraries the wrapper does not seem to really work and we
+        # # endup having to link with the other libraries
+        # # if not self.options.shared:
+        # if self.options.use_system_libs:
+        #     self.cpp_info.libs.extend(["hdf5", "lapack", "blas"])
+        # else:
+        #     # Note that the lapack library from darcamo/stable already links with openblas
+        #     self.cpp_info.libs.extend(["hdf5", "lapack"])
