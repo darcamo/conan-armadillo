@@ -13,8 +13,8 @@ class ArmadilloConan(ConanFile):
     description = "C++ library for linear algebra & scientific computing"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
-               "use_system_libs": [True, False]  # If true the recipe will use blas and lapack from system
-    }
+               # If true the recipe will use blas and lapack from system
+               "use_system_libs": [True, False]}
     default_options = "shared=True", "use_system_libs=False"
     generators = "cmake"
     source_folder_name = "armadillo-{0}".format(version)
@@ -25,14 +25,14 @@ class ArmadilloConan(ConanFile):
             self.options.use_system_libs = False
 
         if not self.options.use_system_libs:
-            # self.requires("openblas/0.3.0@darcamo/stable")
-            self.requires("lapack/3.7.1@darcamo/stable")  # Already includes openblas
+            # Note that lapack/3.7.1@darcamo/stable includes openblas
+            self.requires("lapack/3.7.1@darcamo/stable")
             # self.requires("lapack/3.7.1@conan/stable")
             self.requires("HDF5/1.10.1@darcamo/stable")
 
-    def configure(self):
-        if self.settings.os == "Windows":
-            self.options["lapack"].visual_studio=True
+    # def configure(self):
+    #     if self.settings.os == "Windows":
+    #         self.options["lapack"].visual_studio=True
 
     def build_requirements(self):
         if self.settings.os == "Windows":
@@ -44,7 +44,8 @@ class ArmadilloConan(ConanFile):
             # The 'system_lib_names' variable will have the names of the system
             # libraries to be installed
             if tools.os_info.linux_distro == "ubuntu":
-                system_lib_names = (["libhdf5-dev", "libblas-dev", "liblapacke-dev"])
+                system_lib_names = (
+                    ["libhdf5-dev", "libblas-dev", "liblapacke-dev"])
             elif tools.os_info.linux_distro == "arch":
                 system_lib_names = (["hdf5", "blas", "lapacke"])
             else:
@@ -87,18 +88,28 @@ class ArmadilloConan(ConanFile):
         # If use_system_libs is true then we don't touch armadillo
         # CMakeLists.txt file and let armadillo find the installed libraries.
         if not self.options.use_system_libs:
-            tools.replace_in_file("sources/CMakeLists.txt", "project(armadillo CXX C)",
-                                  '''project(armadillo CXX C)
-                                  include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
-                                  conan_basic_setup()''')
+            tools.replace_in_file(
+                "sources/CMakeLists.txt",
+                "project(armadillo CXX C)",
+                '''project(armadillo CXX C)
+                include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
+                conan_basic_setup()''')
 
-            tools.replace_in_file("sources/CMakeLists.txt", "set(ARMA_USE_WRAPPER true)",
-                                  "set(ARMA_USE_WRAPPER false)")
+            # tools.replace_in_file(
+            #     "sources/CMakeLists.txt",
+            #     "set(ARMA_USE_WRAPPER true)",
+            #     "set(ARMA_USE_WRAPPER false)")
 
-            tools.replace_in_file("sources/CMakeLists.txt", "target_link_libraries( armadillo ${ARMA_LIBS} )",
-                                  "target_link_libraries( armadillo ${CONAN_LIBS} )")
-            tools.replace_in_file("sources/CMakeLists.txt", "find_package(HDF5 QUIET COMPONENTS C)",
-                                  "")
+            tools.replace_in_file(
+                "sources/CMakeLists.txt",
+                "target_link_libraries( armadillo ${ARMA_LIBS} )",
+                "target_link_libraries( armadillo ${CONAN_LIBS} )")
+
+            # tools.replace_in_file(
+            #     "sources/CMakeLists.txt",
+            #     "find_package(HDF5 QUIET COMPONENTS C)",
+            #     "")
+
 
         cmake.configure(source_folder="sources", build_folder="sources")
         cmake.build()
@@ -108,6 +119,7 @@ class ArmadilloConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = ["lib", "lib64"]
         self.cpp_info.libs = ["armadillo"]
+
         # self.cpp_info.defines.append("ARMA_DONT_USE_WRAPPER")
 
         # Note that in case that system libs is set to True then HDF5 will be
@@ -120,20 +132,21 @@ class ArmadilloConan(ConanFile):
             # we are including it. Let's tell armadillo to actually use it.
             self.cpp_info.defines.append("ARMA_USE_HDF5")
 
-        # # In case we are linking with the system HDF5 library and we are in
-        # # ubuntu, we need to add the folder where the HDF5 library can be
-        # # found. Note that other distros such as Arch put the HDF5 library in
-        # # the standard /usr/lib folder.
-        # if tools.os_info.linux_distro == "ubuntu" and self.options.use_system_libs:
-        #     self.cpp_info.libdirs.append("/usr/lib/x86_64-linux-gnu/hdf5/serial")
+        # In case we are linking with the system HDF5 library and we are in
+        # ubuntu, we need to add the folder where the HDF5 library can be
+        # found. Note that other distros such as Arch put the HDF5 library in
+        # the standard /usr/lib folder.
+        distro = tools.os_info.linux_distro
+        if distro == "ubuntu" and self.options.use_system_libs:
+            self.cpp_info.libdirs.append(
+                "/usr/lib/x86_64-linux-gnu/hdf5/serial")
 
-        # # self.cpp_info.libs = ["armadillo"]
-
-        # # For static libraries the wrapper does not seem to really work and we
-        # # endup having to link with the other libraries
-        # # if not self.options.shared:
-        # if self.options.use_system_libs:
-        #     self.cpp_info.libs.extend(["hdf5", "lapack", "blas"])
-        # else:
-        #     # Note that the lapack library from darcamo/stable already links with openblas
-        #     self.cpp_info.libs.extend(["hdf5", "lapack"])
+        # For static libraries the wrapper does not seem to really work and
+        # we end up having to link with the other libraries anyway
+        if not self.options.shared:
+            if self.options.use_system_libs:
+                self.cpp_info.libs.extend(["hdf5", "lapack", "blas"])
+            else:
+                # Note that the lapack library from darcamo/stable already
+                # links with openblas
+                self.cpp_info.libs.extend(["hdf5", "lapack"])
