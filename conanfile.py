@@ -25,8 +25,9 @@ class ArmadilloConan(ConanFile):
             self.options.use_system_libs = False
 
         if not self.options.use_system_libs:
+            self.requires("openblas/0.3.0@darcamo/stable")
             # Note that lapack/3.7.1@darcamo/stable includes openblas
-            self.requires("lapack/3.7.1@darcamo/stable")
+            # self.requires("lapack/3.7.1@darcamo/stable")
             # self.requires("lapack/3.7.1@conan/stable")
             self.requires("HDF5/1.10.1@darcamo/stable")
 
