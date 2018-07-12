@@ -13,9 +13,10 @@ class ArmadilloConan(ConanFile):
     description = "C++ library for linear algebra & scientific computing"
     settings = "os"
     options = {
-               # If true the recipe will use blas and lapack from system
-               "use_system_libs": [True, False]}
-    default_options = "use_system_libs=False"
+        # If true the recipe will use blas and lapack from system
+        "use_system_libs": [True, False],
+        "use_extern_cxx11_rng": [True, False]}
+    default_options = "use_system_libs=False", "use_extern_cxx11_rng=False"
     generators = "cmake"
     source_folder_name = "armadillo-{0}".format(version)
     source_tar_file = "{0}.tar.xz".format(source_folder_name)
@@ -80,6 +81,8 @@ class ArmadilloConan(ConanFile):
         self.copy("*", dst="include", src="sources/include")
 
     def package_info(self):
+        if self.options.use_extern_cxx11_rng:
+            self.cpp_info.defines.append("ARMA_USE_EXTERN_CXX11_RNG")
         if self.options.use_system_libs:
             self.cpp_info.libs.extend(["lapack", "blas", "hdf5"])
 
