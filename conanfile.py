@@ -11,7 +11,7 @@ class ArmadilloConan(ConanFile):
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
     url = "https://github.com/darcamo/conan-recipes"
     description = "C++ library for linear algebra & scientific computing"
-    settings = "os"
+    settings = "os", "build_type"
     options = {
         # If true the recipe will use blas and lapack from system
         "use_system_libs": [True, False],
@@ -25,12 +25,8 @@ class ArmadilloConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Windows":
             self.options.use_system_libs = False
-
         if not self.options.use_system_libs:
             self.requires("openblas/0.3.0@darcamo/stable")
-            # Note that lapack/3.7.1@darcamo/stable includes openblas
-            # self.requires("lapack/3.7.1@darcamo/stable")
-            # self.requires("lapack/3.7.1@conan/stable")
             self.requires("HDF5/1.10.1@darcamo/stable")
 
     def build_requirements(self):
@@ -88,6 +84,10 @@ class ArmadilloConan(ConanFile):
     def package_info(self):
         if self.options.use_extern_cxx11_rng:
             self.cpp_info.defines.append("ARMA_USE_EXTERN_CXX11_RNG")
+
+        if self.settings.build_type == "Release":
+            self.cpp_info.defines.append("ARMA_NO_DEBUG")
+
         if self.options.use_system_libs:
             if self.options.link_with_mkl:
                 self.cpp_info.libs.extend(["mkl_rt", "hdf5"])
