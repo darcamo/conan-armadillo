@@ -15,8 +15,9 @@ class ArmadilloConan(ConanFile):
     options = {
         # If true the recipe will use blas and lapack from system
         "use_system_libs": [True, False],
-        "use_extern_cxx11_rng": [True, False]}
-    default_options = "use_system_libs=False", "use_extern_cxx11_rng=False"
+        "use_extern_cxx11_rng": [True, False],
+        "link_with_mkl": [True, False]}
+    default_options = "use_system_libs=False", "link_with_mkl=False", "use_extern_cxx11_rng=False"
     generators = "cmake"
     source_folder_name = "armadillo-{0}".format(version)
     source_tar_file = "{0}.tar.xz".format(source_folder_name)
@@ -53,6 +54,10 @@ class ArmadilloConan(ConanFile):
             for lib in system_lib_names:
                 installer.install(lib)
 
+    def configure(self):
+        if self.options.link_with_mkl and not self.options.use_system_libs:
+             raise Exception("Link with MKL options can only be True when use_system_libs is also True")
+
     def source(self):
         tools.download(
             "http://sourceforge.net/projects/arma/files/{0}".format(
@@ -84,7 +89,11 @@ class ArmadilloConan(ConanFile):
         if self.options.use_extern_cxx11_rng:
             self.cpp_info.defines.append("ARMA_USE_EXTERN_CXX11_RNG")
         if self.options.use_system_libs:
-            self.cpp_info.libs.extend(["lapack", "blas", "hdf5"])
+            if self.options.link_with_mkl:
+                self.cpp_info.libs.extend(["mkl_rt", "hdf5"])
+                self.cpp_info.libdirs.append("/opt/intel/mkl/lib/intel64")
+            else:
+                self.cpp_info.libs.extend(["lapack", "blas", "hdf5"])
 
     def package_id(self):
         self.info.header_only()
