@@ -9,7 +9,7 @@ class ArmadilloConan(ConanFile):
     version = "9.100.5"
     license = "Apache License 2.0"
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
-    url = "https://github.com/darcamo/conan-recipes"
+    url = "https://github.com/darcamo/conan-armadillo"
     description = "C++ library for linear algebra & scientific computing"
     settings = "os", "build_type"
     options = {
@@ -26,8 +26,8 @@ class ArmadilloConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.use_system_libs = False
         if not self.options.use_system_libs:
-            self.requires("openblas/0.3.0@darcamo/stable")
-            self.requires("HDF5/1.10.2@darcamo/stable")
+            self.requires("openblas/0.3.3@darcamo/stable")
+            self.requires("HDF5/1.10.3@darcamo/stable")
 
     def build_requirements(self):
         if self.settings.os == "Windows":
@@ -94,6 +94,9 @@ class ArmadilloConan(ConanFile):
                 self.cpp_info.libdirs.append("/opt/intel/mkl/lib/intel64")
             else:
                 self.cpp_info.libs.extend(["lapack", "blas", "hdf5"])
+        # else:
+        #     # Maybe conan does this automatically
+        #     self.cpp_info.libs.extend(self.deps_cpp_info.libs)
 
     def package_id(self):
         self.info.header_only()
