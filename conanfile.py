@@ -6,7 +6,7 @@ import shutil
 
 class ArmadilloConan(ConanFile):
     name = "armadillo"
-    version = "9.200.4"
+    version = "9.200.5"
     license = "Apache License 2.0"
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
     url = "https://github.com/darcamo/conan-armadillo"
