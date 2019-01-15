@@ -6,7 +6,7 @@ import shutil
 
 class ArmadilloConan(ConanFile):
     name = "armadillo"
-    version = "9.200.6"
+    version = "9.200.7"
     license = "Apache License 2.0"
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
     url = "https://github.com/darcamo/conan-armadillo"
@@ -26,7 +26,7 @@ class ArmadilloConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.use_system_libs = False
         if not self.options.use_system_libs:
-            self.requires("openblas/0.3.4@darcamo/stable")
+            self.requires("openblas/0.3.5@darcamo/stable")
             self.requires("HDF5/1.10.4@darcamo/stable")
 
     def build_requirements(self):
