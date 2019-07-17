@@ -17,7 +17,9 @@ class ArmadilloConan(ConanFile):
         "use_system_libs": [True, False],
         "use_extern_cxx11_rng": [True, False],
         "link_with_mkl": [True, False]}
-    default_options = "use_system_libs=False", "link_with_mkl=False", "use_extern_cxx11_rng=False"
+    default_options = ("use_system_libs=False",
+                       "link_with_mkl=False",
+                       "use_extern_cxx11_rng=False")
     generators = "cmake"
     source_folder_name = "armadillo-{0}".format(version)
     source_tar_file = "{0}.tar.xz".format(source_folder_name)
@@ -93,10 +95,14 @@ class ArmadilloConan(ConanFile):
                 self.cpp_info.libs.extend(["mkl_rt", "hdf5"])
                 self.cpp_info.libdirs.append("/opt/intel/mkl/lib/intel64")
             else:
+                if tools.os_info.linux_distro == "ubuntu":
+                    # In ubuntu the HDF5 library (both includes and the
+                    # compiled library) is located in a non-standard paths
+                    self.cpp_info.includedirs.append("/usr/include/hdf5/serial")
+                    self.cpp_info.libdirs.append("/usr/lib/x86_64-linux-gnu/hdf5/serial")
+
+                # This will work in both ubuntu and arch
                 self.cpp_info.libs.extend(["lapack", "blas", "hdf5"])
-        # else:
-        #     # Maybe conan does this automatically
-        #     self.cpp_info.libs.extend(self.deps_cpp_info.libs)
 
     def package_id(self):
         self.info.header_only()
