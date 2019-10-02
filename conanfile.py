@@ -1,12 +1,13 @@
-from conans import ConanFile, CMake, tools
 # from conans.errors import ConanException
 import os
 import shutil
 
+from conans import CMake, ConanFile, tools
+
 
 class ArmadilloConan(ConanFile):
     name = "armadillo"
-    version = "9.700.2"
+    version = "9.700.3"
     license = "Apache License 2.0"
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
     url = "https://github.com/darcamo/conan-armadillo"
