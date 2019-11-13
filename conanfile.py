@@ -15,10 +15,12 @@ class ArmadilloConan(ConanFile):
     settings = "os", "build_type"
     options = {
         # If true the recipe will use blas and lapack from system
-        "use_system_libs": [True, False],
+        "use_system_blas": [True, False],
+        "use_system_hdf5": [True, False],
         "use_extern_cxx11_rng": [True, False],
         "link_with_mkl": [True, False]}
-    default_options = ("use_system_libs=False",
+    default_options = ("use_system_blas=False",
+                       "use_system_hdf5=False",
                        "link_with_mkl=False",
                        "use_extern_cxx11_rng=False")
     generators = "cmake"
@@ -27,9 +29,11 @@ class ArmadilloConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Windows":
-            self.options.use_system_libs = False
-        if not self.options.use_system_libs:
+            self.options.use_system_blas = False
+            self.options.use_system_hdf5 = False
+        if not self.options.use_system_blas:
             self.requires("openblas/[>=0.3.5]@darcamo/stable")
+        if not self.options.use_system_hdf5:
             self.requires("HDF5/[>=1.10.4]@darcamo/stable")
 
     def build_requirements(self):
@@ -38,24 +42,31 @@ class ArmadilloConan(ConanFile):
             self.build_requires("cmake_installer/3.11.3@conan/stable")
 
     def system_requirements(self):
-        if self.options.use_system_libs:
+        system_lib_names = []
+        if self.options.use_system_hdf5:
             # The 'system_lib_names' variable will have the names of the system
             # libraries to be installed
             if tools.os_info.linux_distro == "ubuntu":
-                system_lib_names = (
-                    ["libhdf5-dev", "libblas-dev", "liblapacke-dev"])
+                system_lib_names.append("libhdf5-dev")
             elif tools.os_info.linux_distro == "arch":
-                system_lib_names = (["hdf5", "blas", "lapacke"])
-            else:
-                system_lib_names = []
+                system_lib_names.append("hdf5")
 
-            installer = tools.SystemPackageTool()
-            for lib in system_lib_names:
-                installer.install(lib)
+        if self.options.use_system_blas:
+            # The 'system_lib_names' variable will have the names of the system
+            # libraries to be installed
+            if tools.os_info.linux_distro == "ubuntu":
+                system_lib_names.extend(["libblas-dev", "liblapacke-dev"])
+            elif tools.os_info.linux_distro == "arch":
+                system_lib_names.extend(["blas", "lapacke"])
+
+        # Install libraries
+        installer = tools.SystemPackageTool()
+        for lib in system_lib_names:
+            installer.install(lib)
 
     def configure(self):
-        if self.options.link_with_mkl and not self.options.use_system_libs:
-             raise Exception("Link with MKL options can only be True when use_system_libs is also True")
+        if self.options.link_with_mkl and not self.options.use_system_blas:
+             raise Exception("Link with MKL options can only be True when use_system_blas is also True")
 
     def source(self):
         tools.download(
@@ -91,19 +102,22 @@ class ArmadilloConan(ConanFile):
         if self.settings.build_type == "Release":
             self.cpp_info.defines.append("ARMA_NO_DEBUG")
 
-        if self.options.use_system_libs:
+        if self.options.use_system_hdf5:
+            if tools.os_info.linux_distro == "ubuntu":
+                # In ubuntu the HDF5 library (both includes and the
+                # compiled library) is located in a non-standard paths
+                self.cpp_info.includedirs.append("/usr/include/hdf5/serial")
+                self.cpp_info.libdirs.append("/usr/lib/x86_64-linux-gnu/hdf5/serial")
+
+            self.cpp_info.libs.extend(["hdf5"])
+
+        if self.options.use_system_blas:
             if self.options.link_with_mkl:
-                self.cpp_info.libs.extend(["mkl_rt", "hdf5"])
+                self.cpp_info.libs.extend(["mkl_rt"])
                 self.cpp_info.libdirs.append("/opt/intel/mkl/lib/intel64")
             else:
-                if tools.os_info.linux_distro == "ubuntu":
-                    # In ubuntu the HDF5 library (both includes and the
-                    # compiled library) is located in a non-standard paths
-                    self.cpp_info.includedirs.append("/usr/include/hdf5/serial")
-                    self.cpp_info.libdirs.append("/usr/lib/x86_64-linux-gnu/hdf5/serial")
-
                 # This will work in both ubuntu and arch
-                self.cpp_info.libs.extend(["lapack", "blas", "hdf5"])
+                self.cpp_info.libs.extend(["lapack", "blas"])
 
     def package_id(self):
         self.info.header_only()
