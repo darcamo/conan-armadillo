@@ -7,7 +7,7 @@ from conans import CMake, ConanFile, tools
 
 class ArmadilloConan(ConanFile):
     name = "armadillo"
-    version = "9.800.2"
+    version = "9.800.3"
     license = "Apache License 2.0"
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
     url = "https://github.com/darcamo/conan-armadillo"
