@@ -7,7 +7,7 @@ from conans import CMake, ConanFile, tools
 
 class ArmadilloConan(ConanFile):
     name = "armadillo"
-    version = "9.800.3"
+    version = "9.800.4"
     license = "Apache License 2.0"
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
     url = "https://github.com/darcamo/conan-armadillo"
@@ -18,11 +18,10 @@ class ArmadilloConan(ConanFile):
         "use_system_blas": [True, False],
         "use_system_hdf5": [True, False],
         "use_extern_cxx11_rng": [True, False],
-        "link_with_mkl": [True, False]}
-    default_options = ("use_system_blas=False",
-                       "use_system_hdf5=False",
-                       "link_with_mkl=False",
-                       "use_extern_cxx11_rng=False")
+        "link_with_mkl": [True, False]
+    }
+    default_options = ("use_system_blas=False", "use_system_hdf5=False",
+                       "link_with_mkl=False", "use_extern_cxx11_rng=False")
     generators = "cmake"
     source_folder_name = "armadillo-{0}".format(version)
     source_tar_file = "{0}.tar.xz".format(source_folder_name)
@@ -66,13 +65,14 @@ class ArmadilloConan(ConanFile):
 
     def configure(self):
         if self.options.link_with_mkl and not self.options.use_system_blas:
-             raise Exception("Link with MKL options can only be True when use_system_blas is also True")
+            raise Exception(
+                "Link with MKL options can only be True when use_system_blas is also True"
+            )
 
     def source(self):
         tools.download(
             "http://sourceforge.net/projects/arma/files/{0}".format(
-                self.source_tar_file),
-            self.source_tar_file)
+                self.source_tar_file), self.source_tar_file)
         if self.settings.os == "Windows":
             self.run("7z x %s" % self.source_tar_file)
             tar_filename = os.path.splitext(self.source_tar_file)[0]
@@ -82,7 +82,6 @@ class ArmadilloConan(ConanFile):
             self.run("tar -xvf {0}".format(self.source_tar_file))
         # os.remove(self.source_tar_file)
         os.rename(self.source_folder_name, "sources")
-
 
         tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
                               "// #define ARMA_USE_HDF5",
@@ -107,7 +106,8 @@ class ArmadilloConan(ConanFile):
                 # In ubuntu the HDF5 library (both includes and the
                 # compiled library) is located in a non-standard paths
                 self.cpp_info.includedirs.append("/usr/include/hdf5/serial")
-                self.cpp_info.libdirs.append("/usr/lib/x86_64-linux-gnu/hdf5/serial")
+                self.cpp_info.libdirs.append(
+                    "/usr/lib/x86_64-linux-gnu/hdf5/serial")
 
             self.cpp_info.libs.extend(["hdf5"])
 
