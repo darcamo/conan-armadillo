@@ -33,7 +33,7 @@ class ArmadilloConan(ConanFile):
         if not self.options.use_system_blas:
             self.requires("openblas/[>=0.3.5]@darcamo/stable")
         if not self.options.use_system_hdf5:
-            self.requires("HDF5/[>=1.10.4]@darcamo/stable")
+            self.requires("hdf5/[>=1.10.5]")
 
     def build_requirements(self):
         if self.settings.os == "Windows":
