@@ -31,8 +31,7 @@ class ArmadilloConan(ConanFile):
             self.options.use_system_blas = False
             self.options.use_system_hdf5 = False
         if not self.options.use_system_blas:
-            self.requires("openblas/[>=0.3.5]")
-            self.options["openblas"].build_lapack = True
+            self.requires("openblas/[>=0.3.5]@darcamo/stable")
         if not self.options.use_system_hdf5:
             self.requires("hdf5/1.10.6")
 
