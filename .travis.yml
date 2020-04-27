@@ -5,7 +5,7 @@ env:
      - CONAN_LOGIN_USERNAME: "darcamo"
      - CONAN_CHANNEL: "stable"
      - CONAN_UPLOAD: "https://api.bintray.com/conan/darcamo/cppsim"
-     # - CONAN_BUILD_POLICY: "outdated"
+     - CONAN_BUILD_POLICY: "missing"
 
 linux: &linux
    os: linux
