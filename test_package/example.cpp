@@ -16,4 +16,6 @@ int main() {
     singular_values.print("S");
 
     singular_values.save("singular_values.h5", arma::hdf5_binary);
+
+    m.save(arma::hdf5_name("m_matrix.h5", "m"));
 }
