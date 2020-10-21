@@ -11,7 +11,12 @@ class ArmadilloConan(ConanFile):
     license = "Apache License 2.0"
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
     url = "https://github.com/darcamo/conan-armadillo"
+    homepage = "http://arma.sourceforge.net/"
     description = "C++ library for linear algebra & scientific computing"
+    topics = ("linear algebra",
+              "scientific computing",
+              "matrix",
+              "vector")
     settings = "os", "build_type"
     options = {
         # If true the recipe will use blas and lapack from system
@@ -31,7 +36,8 @@ class ArmadilloConan(ConanFile):
             self.options.use_system_blas = False
             self.options.use_system_hdf5 = False
         if not self.options.use_system_blas:
-            self.requires("openblas/[>=0.3.5]@darcamo/stable")
+            self.requires("openblas/[>=0.3.5]")
+            self.options["openblas"].build_lapack = True
         if not self.options.use_system_hdf5:
             self.requires("hdf5/1.10.6")
 
