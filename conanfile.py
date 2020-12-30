@@ -39,47 +39,23 @@ class ArmadilloConan(ConanFile):
         "link_with_mkl": False,
         "use_extern_cxx11_rng": False
     }
-    generators = ["cmake_find_package", "cmake_paths"]
+    generators = "cmake"
     source_folder_name = "armadillo-{0}".format(version)
     source_tar_file = "{0}.tar.xz".format(source_folder_name)
 
     def requirements(self):
-        # if self.settings.os == "Windows":
-        #     self.options.use_system_blas = False
-        #     self.options.use_system_hdf5 = False
         if not self.options.use_system_blas:
             self.requires("openblas/[>=0.3.10]")
-            self.options["openblas"].build_lapack = True
+            self.requires("lapack/3.7.1@conan/stable")
+            self.requires("zlib/1.2.11")
             if self.options.shared:
                 self.options["openblas"].shared = True
+                self.options["lapack"].shared = True
 
         if not self.options.use_system_hdf5:
             self.requires("hdf5/1.10.6")
             if self.options.shared:
                 self.options["hdf5"].shared = True
-
-    # def system_requirements(self):
-    #     system_lib_names = []
-    #     if self.options.use_system_hdf5:
-    #         # The 'system_lib_names' variable will have the names of the system
-    #         # libraries to be installed
-    #         if tools.os_info.linux_distro == "ubuntu":
-    #             system_lib_names.append("libhdf5-dev")
-    #         elif tools.os_info.linux_distro == "arch":
-    #             system_lib_names.append("hdf5")
-
-    #     if self.options.use_system_blas:
-    #         # The 'system_lib_names' variable will have the names of the system
-    #         # libraries to be installed
-    #         if tools.os_info.linux_distro == "ubuntu":
-    #             system_lib_names.extend(["libblas-dev", "liblapacke-dev"])
-    #         elif tools.os_info.linux_distro == "arch":
-    #             system_lib_names.extend(["blas", "lapacke"])
-
-    #     # Install libraries
-    #     installer = tools.SystemPackageTool()
-    #     for lib in system_lib_names:
-    #         installer.install(lib)
 
     def configure(self):
         if self.options.link_with_mkl and not self.options.use_system_blas:
@@ -103,64 +79,25 @@ class ArmadilloConan(ConanFile):
         # os.remove(self.source_tar_file)
         os.rename(self.source_folder_name, "sources")
 
-#         tools.replace_in_file("sources/CMakeLists.txt",
-#                               "project(armadillo CXX C)",
-#                               """project(armadillo CXX C)
-# include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-# conan_basic_setup()""")
+        tools.replace_in_file("sources/CMakeLists.txt",
+                              "project(armadillo CXX C)",
+                              """project(armadillo CXX C)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()""")
 
-#         tools.replace_in_file("sources/CMakeLists.txt",
-#                               "target_link_libraries( armadillo ${ARMA_LIBS} )",
-#                               "target_link_libraries( armadillo ${ARMA_LIBS} ${CONAN_LIBS})")
-
-        # tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
-        #                       "// #define ARMA_USE_HDF5",
-        #                       "#define ARMA_USE_HDF5")
-        # # The command above remove the comment from ARMA_USE_HDF5_ALT, but we want it commented out
-        # tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
-        #                       "#define ARMA_USE_HDF5_ALT",
-        #                       "// #define ARMA_USE_HDF5_ALT")
+        tools.replace_in_file("sources/CMakeLists.txt",
+                              "target_link_libraries( armadillo ${ARMA_LIBS} )",
+                              "target_link_libraries( armadillo ${ARMA_LIBS} ${CONAN_LIBS})")
 
     def build(self):
         cmake = CMake(self)
         os.mkdir("build")
         shutil.move("conanbuildinfo.cmake", "build/")
-        cmake.definitions["ARMA_DONT_USE_WRAPPER"] = True
+        # cmake.definitions["ARMA_DONT_USE_WRAPPER"] = True
+        cmake.definitions["ARMA_USE_LAPACK"] = True
         cmake.configure(source_folder="sources", build_folder="build")
         cmake.build()
         cmake.install()
 
-
-    # def package(self):
-    #     self.copy("*", dst="include", src="sources/include")
-
-    # def package_info(self):
-    #     if self.options.use_extern_cxx11_rng:
-    #         self.cpp_info.defines.append("ARMA_USE_EXTERN_CXX11_RNG")
-
-    #     if self.settings.build_type == "Release":
-    #         self.cpp_info.defines.append("ARMA_NO_DEBUG")
-
-    #     if self.options.use_system_hdf5:
-    #         if tools.os_info.linux_distro == "ubuntu":
-    #             # In ubuntu the HDF5 library (both includes and the
-    #             # compiled library) is located in a non-standard paths
-    #             self.cpp_info.includedirs.append("/usr/include/hdf5/serial")
-    #             self.cpp_info.libdirs.append(
-    #                 "/usr/lib/x86_64-linux-gnu/hdf5/serial")
-
-    #         self.cpp_info.libs.extend(["hdf5"])
-
-    #     if self.options.use_system_blas:
-    #         if self.options.link_with_mkl:
-    #             self.cpp_info.libs.extend(["mkl_rt"])
-    #             self.cpp_info.libdirs.append("/opt/intel/mkl/lib/intel64")
-    #         else:
-    #             # This will work in both ubuntu and arch
-    #             self.cpp_info.libs.extend(["lapack", "blas"])
-
     def package_info(self):
         self.cpp_info.libs = ["armadillo"]
-
-    # def package_id(self):
-    #     self.info.header_only()
