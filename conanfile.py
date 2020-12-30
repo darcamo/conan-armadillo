@@ -1,6 +1,7 @@
 # from conans.errors import ConanException
 import os
 import shutil
+import warnings
 
 from conans import CMake, ConanFile, tools
 
@@ -19,32 +20,48 @@ class ArmadilloConan(ConanFile):
               "vector")
     settings = "os", "build_type"
     options = {
+        "shared": [True, False],
         # If true the recipe will use blas and lapack from system
-        "use_system_blas": [True, False],
-        "use_system_hdf5": [True, False],
+        "use_system_blas": [True, False],  # If True conan will not install blas
+                                           # -> armadillo will still find and
+                                           # link with a blas implementation in
+                                           # your compiter, if any.
+        "use_system_hdf5": [True, False],  # If True then conan will not install
+                                           # HDF5, but armadillo can still find
+                                           # and use HDF5 in your system, if it
+                                           # is installed
         "use_extern_cxx11_rng": [True, False],
         "link_with_mkl": [True, False]
     }
-    default_options = ("use_system_blas=False", "use_system_hdf5=False",
-                       "link_with_mkl=False", "use_extern_cxx11_rng=False")
+    default_options = {
+        "shared": False,
+        "use_system_blas": False,
+        "use_system_hdf5": False,
+        "link_with_mkl": False,
+        "use_extern_cxx11_rng": False
+    }
+
     generators = "cmake"
     source_folder_name = "armadillo-{0}".format(version)
     source_tar_file = "{0}.tar.xz".format(source_folder_name)
 
     def requirements(self):
         if self.settings.os == "Windows":
+            if self.options.use_system_blas:
+                warnings.warn("use_system_blas is not supported in Windows -> changing to False")
+            if self.options.use_system_hdf5:
+                warnings.warn("use_system_hdf5 is not supported in Windows -> changing to False")
             self.options.use_system_blas = False
             self.options.use_system_hdf5 = False
         if not self.options.use_system_blas:
-            self.requires("openblas/[>=0.3.5]")
+            self.requires("openblas/[>=0.3.10]")
             self.options["openblas"].build_lapack = True
+            if self.options.shared:
+                self.options["openblas"].shared = True
         if not self.options.use_system_hdf5:
             self.requires("hdf5/1.10.6")
-
-    def build_requirements(self):
-        if self.settings.os == "Windows":
-            self.build_requires("7z_installer/1.0@conan/stable")
-            self.build_requires("cmake_installer/3.11.3@conan/stable")
+            if self.options.shared:
+                self.options["hdf5"].shared = True
 
     def system_requirements(self):
         system_lib_names = []
