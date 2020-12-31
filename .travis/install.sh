@@ -19,7 +19,8 @@ if [[ "$(uname -s)" == 'Darwin' ]]; then
     pyenv activate conan
 fi
 
-sudo apt-get -y install gfortran
+sudo apt-get upgrade
+sudo apt-get install -y gfortran
 
 pip install conan --upgrade
 pip install conan_package_tools --upgrade

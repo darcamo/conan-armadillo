@@ -10,4 +10,6 @@ if [[ "$(uname -s)" == 'Darwin' ]]; then
     pyenv activate conan
 fi
 
+sudo apt-get upgrade
+sudo apt-get install -y gfortran
 python build.py
