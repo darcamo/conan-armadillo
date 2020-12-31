@@ -21,20 +21,21 @@ class ArmadilloConan(ConanFile):
     settings = "os", "build_type"
     options = {
         "shared": [True, False],
-        # If true the recipe will use blas and lapack from system
-        "use_system_blas": [True, False],  # If True conan will not install blas
-                                           # -> armadillo will still find and
-                                           # link with a blas implementation in
-                                           # your compiter, if any.
-        "use_system_hdf5": [True, False],  # If True then conan will not install
-                                           # HDF5, but armadillo can still find
-                                           # and use HDF5 in your system, if it
-                                           # is installed
+        # Enable support for HDF5 in armadillo If disabled, use_system_hdf5 option has no effect
+        "enable_hdf5_support" : [True, False],
+        # If True conan will not install blas -> armadillo will still find and
+        # link with a blas implementation in your compiter, if any.
+        "use_system_blas": [True, False],
+        # If True then conan will not install HDF5, but armadillo can still find
+        # and use HDF5 in your system -> you must also set "enable_hdf5_support"
+        # to True
+        "use_system_hdf5": [True, False],
         "use_extern_cxx11_rng": [True, False],
         "link_with_mkl": [True, False]
     }
     default_options = {
         "shared": False,
+        "enable_hdf5_support": True,
         "use_system_blas": False,
         "use_system_hdf5": False,
         "link_with_mkl": False,
@@ -49,7 +50,7 @@ class ArmadilloConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.use_system_blas:
                 warnings.warn("use_system_blas is not supported in Windows -> changing to False")
-            if self.options.use_system_hdf5:
+            if self.options.use_system_hdf5 and self.options.enable_hdf5_support:
                 warnings.warn("use_system_hdf5 is not supported in Windows -> changing to False")
             self.options.use_system_blas = False
             self.options.use_system_hdf5 = False
@@ -58,14 +59,14 @@ class ArmadilloConan(ConanFile):
             self.options["openblas"].build_lapack = True
             if self.options.shared:
                 self.options["openblas"].shared = True
-        if not self.options.use_system_hdf5:
-            self.requires("hdf5/1.10.6")
+        if not self.options.use_system_hdf5 and self.options.enable_hdf5_support:
+            self.requires("hdf5/1.12.0")
             if self.options.shared:
                 self.options["hdf5"].shared = True
 
     def system_requirements(self):
         system_lib_names = []
-        if self.options.use_system_hdf5:
+        if self.options.use_system_hdf5 and self.options.enable_hdf5_support:
             # The 'system_lib_names' variable will have the names of the system
             # libraries to be installed
             if tools.os_info.linux_distro == "ubuntu":
@@ -106,13 +107,14 @@ class ArmadilloConan(ConanFile):
         # os.remove(self.source_tar_file)
         os.rename(self.source_folder_name, "sources")
 
-        tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
-                              "// #define ARMA_USE_HDF5",
-                              "#define ARMA_USE_HDF5")
-        # The command above remove the comment from ARMA_USE_HDF5_ALT, but we want it commented out
-        tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
-                              "#define ARMA_USE_HDF5_ALT",
-                              "// #define ARMA_USE_HDF5_ALT")
+        if self.options.enable_hdf5_support:
+            tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
+                                  "// #define ARMA_USE_HDF5",
+                                  "#define ARMA_USE_HDF5")
+            # The command above remove the comment from ARMA_USE_HDF5_ALT, but we want it commented out
+            tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
+                                  "#define ARMA_USE_HDF5_ALT",
+                                  "// #define ARMA_USE_HDF5_ALT")
 
     def package(self):
         self.copy("*", dst="include", src="sources/include")
@@ -124,7 +126,7 @@ class ArmadilloConan(ConanFile):
         if self.settings.build_type == "Release":
             self.cpp_info.defines.append("ARMA_NO_DEBUG")
 
-        if self.options.use_system_hdf5:
+        if self.options.use_system_hdf5 and self.options.enable_hdf5_support:
             if tools.os_info.linux_distro == "ubuntu":
                 # In ubuntu the HDF5 library (both includes and the
                 # compiled library) is located in a non-standard paths
