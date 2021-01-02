@@ -24,13 +24,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - env: 
-          CONAN_USERNAME: "darcamo"
-          CONAN_LOGIN_USERNAME: "darcamo"
-          CONAN_CHANNEL: "stable"
-          CONAN_UPLOAD: "https://api.bintray.com/conan/darcamo/cppsim"
-          CONAN_BUILD_POLICY: "missing"
+      
       - name: Install gfortran
         run: sudo apt install -y gfortran
       # Runs a set of commands using the runners shell
@@ -40,7 +34,14 @@ jobs:
           pip install --upgrade conan_package_tools
       - name: Login into conan
         run: conan user
+      
       # Runs a set of commands using the runners shell
       - name: Build the package
+        env: 
+          CONAN_USERNAME: "darcamo"
+          CONAN_LOGIN_USERNAME: "darcamo"
+          CONAN_CHANNEL: "stable"
+          CONAN_UPLOAD: "https://api.bintray.com/conan/darcamo/cppsim"
+          CONAN_BUILD_POLICY: "missing"
         run: python build.py
           
