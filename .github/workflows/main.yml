@@ -24,17 +24,21 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
       
       - name: Install gfortran
         run: sudo apt install -y gfortran
       # Runs a set of commands using the runners shell
       - name: Install conan and conan_package_tools
         run: |
-          pip3 install wheel setuptools
-          pip3 install conan --upgrade
-          pip3 install conan_package_tools --upgrade
-          export PATH=$PATH:/home/runner/.local/bin
-          echo $PATH
+          # pip3 install wheel setuptools
+          pip install conan --upgrade
+          pip install conan_package_tools --upgrade
+          # echo `which conan`
+          # echo `which conan` >> $GITHUB_PATH
+          echo $GITHUB_PATH
           conan --version
       - name: Login into conan
         run: conan user
