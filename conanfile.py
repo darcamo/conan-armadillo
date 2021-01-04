@@ -144,6 +144,9 @@ class ArmadilloConan(ConanFile):
 
                 self.cpp_info.libs.extend(["hdf5"])
 
+        else:
+            self.cpp_info.defines.append("ARMA_DONT_USE_HDF5")
+
         if self.options.use_system_blas:
             if self.options.link_with_mkl:
                 self.cpp_info.libs.extend(["mkl_rt"])
