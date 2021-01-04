@@ -107,16 +107,6 @@ class ArmadilloConan(ConanFile):
         # os.remove(self.source_tar_file)
         os.rename(self.source_folder_name, "sources")
 
-    def build(self):
-        if self.options.enable_hdf5_support:
-            tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
-                                  "// #define ARMA_USE_HDF5",
-                                  "#define ARMA_USE_HDF5")
-            # The command above remove the comment from ARMA_USE_HDF5_ALT, but we want it commented out
-            tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
-                                  "#define ARMA_USE_HDF5_ALT",
-                                  "// #define ARMA_USE_HDF5_ALT")
-
     def package(self):
         self.copy("*", dst="include", src="sources/include")
 
@@ -127,15 +117,18 @@ class ArmadilloConan(ConanFile):
         if self.settings.build_type == "Release":
             self.cpp_info.defines.append("ARMA_NO_DEBUG")
 
-        if self.options.use_system_hdf5 and self.options.enable_hdf5_support:
-            if tools.os_info.linux_distro == "ubuntu":
-                # In ubuntu the HDF5 library (both includes and the
-                # compiled library) is located in a non-standard paths
-                self.cpp_info.includedirs.append("/usr/include/hdf5/serial")
-                self.cpp_info.libdirs.append(
-                    "/usr/lib/x86_64-linux-gnu/hdf5/serial")
+        if self.options.enable_hdf5_support:
+            self.cpp_info.defines.append("ARMA_USE_HDF5")
 
-            self.cpp_info.libs.extend(["hdf5"])
+            if self.options.use_system_hdf5:
+                if tools.os_info.linux_distro == "ubuntu":
+                    # In ubuntu the HDF5 library (both includes and the
+                    # compiled library) is located in a non-standard paths
+                    self.cpp_info.includedirs.append("/usr/include/hdf5/serial")
+                    self.cpp_info.libdirs.append(
+                        "/usr/lib/x86_64-linux-gnu/hdf5/serial")
+
+                self.cpp_info.libs.extend(["hdf5"])
 
         if self.options.use_system_blas:
             if self.options.link_with_mkl:

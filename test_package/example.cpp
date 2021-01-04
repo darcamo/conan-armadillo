@@ -20,5 +20,7 @@ int main() {
     singular_values.save("singular_values.h5", arma::hdf5_binary);
     m.save(arma::hdf5_name("m_matrix.h5", "m"));
     std::cout << "Saved" << std::endl;
+    #else
+    std::cout << "HDF5 support in armadillo is not enabled" << std::endl;
     #endif
 }
