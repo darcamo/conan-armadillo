@@ -35,7 +35,7 @@ class ArmadilloConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "enable_hdf5_support": True,
+        "enable_hdf5_support": False,
         "use_system_blas": False,
         "use_system_hdf5": False,
         "link_with_mkl": False,
@@ -107,6 +107,7 @@ class ArmadilloConan(ConanFile):
         # os.remove(self.source_tar_file)
         os.rename(self.source_folder_name, "sources")
 
+    def build(self):
         if self.options.enable_hdf5_support:
             tools.replace_in_file("sources/include/armadillo_bits/config.hpp",
                                   "// #define ARMA_USE_HDF5",

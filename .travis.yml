@@ -39,6 +39,5 @@ install:
   - ./.travis/install.sh
 
 script:
-  - g++ --version
   - chmod +x .travis/run.sh
   - ./.travis/run.sh

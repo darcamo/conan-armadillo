@@ -15,7 +15,10 @@ int main() {
     arma::vec singular_values = arma::svd(m);
     singular_values.print("S");
 
+    #ifdef ARMA_USE_HDF5
+    std::cout << "Saving using HDF5" << std::endl;
     singular_values.save("singular_values.h5", arma::hdf5_binary);
-
     m.save(arma::hdf5_name("m_matrix.h5", "m"));
+    std::cout << "Saved" << std::endl;
+    #endif
 }
