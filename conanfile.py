@@ -31,15 +31,20 @@ class ArmadilloConan(ConanFile):
         # to True
         "use_system_hdf5": [True, False],
         "use_extern_cxx11_rng": [True, False],
-        "link_with_mkl": [True, False]
+        "link_with_mkl": [True, False],
+        "mkl_library_path": "ANY"
     }
     default_options = {
         "shared": False,
         "enable_hdf5_support": False,
         "use_system_blas": False,
         "use_system_hdf5": False,
+        "use_extern_cxx11_rng": False,
         "link_with_mkl": False,
-        "use_extern_cxx11_rng": False
+        "mkl_library_path": "default"  # You can also pass the path here. If you
+                                       # don't specify, the string "default"
+                                       # will be replaced by a path depending on
+                                       # the OS
     }
 
     generators = "cmake"
@@ -47,13 +52,14 @@ class ArmadilloConan(ConanFile):
     source_tar_file = "{0}.tar.xz".format(source_folder_name)
 
     def requirements(self):
-        if self.settings.os == "Windows":
-            if self.options.use_system_blas:
+        if tools.os_info.is_windows:
+            if self.options.use_system_blas and not self.options.link_with_mkl:
                 warnings.warn("use_system_blas is not supported in Windows -> changing to False")
+                self.options.use_system_blas = False
             if self.options.use_system_hdf5 and self.options.enable_hdf5_support:
                 warnings.warn("use_system_hdf5 is not supported in Windows -> changing to False")
-            self.options.use_system_blas = False
-            self.options.use_system_hdf5 = False
+                self.options.use_system_hdf5 = False
+
         if not self.options.use_system_blas:
             self.requires("openblas/[>=0.3.10]")
             self.options["openblas"].build_lapack = True
@@ -92,6 +98,14 @@ class ArmadilloConan(ConanFile):
             raise Exception(
                 "Link with MKL options can only be True when use_system_blas is also True"
             )
+        if self.options.link_with_mkl and self.options.mkl_library_path == "default":
+            if tools.os_info.is_linux:
+                self.options.mkl_library_path = "/opt/intel/mkl/lib/intel64"
+            elif tools.os_info.is_windows:
+                self.options.mkl_library_path = "C:/IntelSWTools/compilers_and_libraries/windows/mkl/lib/intel64"
+            else:
+                raise Exception(
+                "A default path for MKL library is now available in conan recipe for your OS. Please pass the 'mkl_library_path' option specifying the path of the MKL library" )
 
     def source(self):
         tools.download(
@@ -133,7 +147,7 @@ class ArmadilloConan(ConanFile):
         if self.options.use_system_blas:
             if self.options.link_with_mkl:
                 self.cpp_info.libs.extend(["mkl_rt"])
-                self.cpp_info.libdirs.append("/opt/intel/mkl/lib/intel64")
+                self.cpp_info.libdirs.append(self.options.mkl_library_path)
             else:
                 # This will work in both ubuntu and arch
                 self.cpp_info.libs.extend(["lapack", "blas"])
