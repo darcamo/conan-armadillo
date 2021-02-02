@@ -30,10 +30,9 @@ jobs:
 
       - name: Install gfortran
         run: sudo apt install -y gfortran
-      # Runs a set of commands using the runners shell
+
       - name: Install conan and conan_package_tools
         run: |
-          # pip3 install wheel setuptools
           pip install conan --upgrade
           pip install conan_package_tools --upgrade
           # echo `which conan`
