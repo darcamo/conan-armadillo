@@ -150,7 +150,7 @@ class ArmadilloConan(ConanFile):
         if self.options.use_system_blas:
             if self.options.link_with_mkl:
                 self.cpp_info.libs.extend(["mkl_rt"])
-                self.cpp_info.libdirs.append(self.options.mkl_library_path)
+                self.cpp_info.libdirs.append(str(self.options.mkl_library_path))
             else:
                 # This will work in both ubuntu and arch
                 self.cpp_info.libs.extend(["lapack", "blas"])
