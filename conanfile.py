@@ -30,7 +30,7 @@ class ArmadilloConan(ConanFile):
         # and use HDF5 in your system -> you must also set "enable_hdf5_support"
         # to True
         "use_system_hdf5": [True, False],
-        "use_extern_cxx11_rng": [True, False],
+        "use_extern_rng": [True, False],
         "link_with_mkl": [True, False],
         "mkl_library_path": "ANY"
     }
@@ -39,7 +39,7 @@ class ArmadilloConan(ConanFile):
         "enable_hdf5_support": False,
         "use_system_blas": False,
         "use_system_hdf5": False,
-        "use_extern_cxx11_rng": False,
+        "use_extern_rng": False,
         "link_with_mkl": False,
         "mkl_library_path": "default"  # You can also pass the path here. If you
                                        # don't specify, the string "default"
@@ -125,8 +125,8 @@ class ArmadilloConan(ConanFile):
         self.copy("*", dst="include", src="sources/include")
 
     def package_info(self):
-        if self.options.use_extern_cxx11_rng:
-            self.cpp_info.defines.append("ARMA_USE_EXTERN_CXX11_RNG")
+        if self.options.use_extern_rng:
+            self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")
 
         if self.settings.build_type == "Release":
             self.cpp_info.defines.append("ARMA_NO_DEBUG")
