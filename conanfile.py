@@ -111,14 +111,14 @@ class ArmadilloConan(ConanFile):
         tools.download(
             "http://sourceforge.net/projects/arma/files/{0}".format(
                 self.source_tar_file), self.source_tar_file)
-        if self.settings.os == "Windows":
-            self.run("7z x %s" % self.source_tar_file)
-            tar_filename = os.path.splitext(self.source_tar_file)[0]
-            self.run("7z x %s" % tar_filename)
-            os.unlink(self.source_tar_file)
-        else:
-            self.run("tar -xvf {0}".format(self.source_tar_file))
-        # os.remove(self.source_tar_file)
+        # if self.settings.os == "Windows":
+        #     self.run("7z x %s" % self.source_tar_file)
+        #     tar_filename = os.path.splitext(self.source_tar_file)[0]
+        #     self.run("7z x %s" % tar_filename)
+        #     os.unlink(self.source_tar_file)
+        # else:
+        #     self.run("tar -xvf {0}".format(self.source_tar_file))
+        self.run("tar -xvf {0}".format(self.source_tar_file))
         os.rename(self.source_folder_name, "sources")
 
     def package(self):
