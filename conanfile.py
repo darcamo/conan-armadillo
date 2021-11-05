@@ -8,21 +8,18 @@ from conans import CMake, ConanFile, tools
 
 class ArmadilloConan(ConanFile):
     name = "armadillo"
-    version = "10.7.1"
+    version = "10.7.3"
     license = "Apache License 2.0"
     author = "Darlan Cavalcante Moreira (darcamo@gmail.com)"
     url = "https://github.com/darcamo/conan-armadillo"
     homepage = "http://arma.sourceforge.net/"
     description = "C++ library for linear algebra & scientific computing"
-    topics = ("linear algebra",
-              "scientific computing",
-              "matrix",
-              "vector")
+    topics = ("linear algebra", "scientific computing", "matrix", "vector")
     settings = "os", "build_type"
     options = {
         "shared": [True, False],
         # Enable support for HDF5 in armadillo If disabled, use_system_hdf5 option has no effect
-        "enable_hdf5_support" : [True, False],
+        "enable_hdf5_support": [True, False],
         # If True conan will not install blas -> armadillo will still find and
         # link with a blas implementation in your compiter, if any.
         "use_system_blas": [True, False],
@@ -41,10 +38,11 @@ class ArmadilloConan(ConanFile):
         "use_system_hdf5": False,
         "use_extern_rng": False,
         "link_with_mkl": False,
-        "mkl_library_path": "default"  # You can also pass the path here. If you
-                                       # don't specify, the string "default"
-                                       # will be replaced by a path depending on
-                                       # the OS
+        "mkl_library_path":
+        "default"  # You can also pass the path here. If you
+        # don't specify, the string "default"
+        # will be replaced by a path depending on
+        # the OS
     }
 
     generators = "cmake"
@@ -54,10 +52,14 @@ class ArmadilloConan(ConanFile):
     def requirements(self):
         if tools.os_info.is_windows:
             if self.options.use_system_blas and not self.options.link_with_mkl:
-                warnings.warn("use_system_blas is not supported in Windows -> changing to False")
+                warnings.warn(
+                    "use_system_blas is not supported in Windows -> changing to False"
+                )
                 self.options.use_system_blas = False
             if self.options.use_system_hdf5 and self.options.enable_hdf5_support:
-                warnings.warn("use_system_hdf5 is not supported in Windows -> changing to False")
+                warnings.warn(
+                    "use_system_hdf5 is not supported in Windows -> changing to False"
+                )
                 self.options.use_system_hdf5 = False
 
         if not self.options.use_system_blas:
@@ -105,7 +107,8 @@ class ArmadilloConan(ConanFile):
                 self.options.mkl_library_path = "C:/IntelSWTools/compilers_and_libraries/windows/mkl/lib/intel64"
             else:
                 raise Exception(
-                "A default path for MKL library is now available in conan recipe for your OS. Please pass the 'mkl_library_path' option specifying the path of the MKL library" )
+                    "A default path for MKL library is now available in conan recipe for your OS. Please pass the 'mkl_library_path' option specifying the path of the MKL library"
+                )
 
     def source(self):
         tools.download(
@@ -138,7 +141,8 @@ class ArmadilloConan(ConanFile):
                 if tools.os_info.linux_distro == "ubuntu":
                     # In ubuntu the HDF5 library (both includes and the
                     # compiled library) is located in a non-standard paths
-                    self.cpp_info.includedirs.append("/usr/include/hdf5/serial")
+                    self.cpp_info.includedirs.append(
+                        "/usr/include/hdf5/serial")
                     self.cpp_info.libdirs.append(
                         "/usr/lib/x86_64-linux-gnu/hdf5/serial")
 
@@ -150,7 +154,8 @@ class ArmadilloConan(ConanFile):
         if self.options.use_system_blas:
             if self.options.link_with_mkl:
                 self.cpp_info.libs.extend(["mkl_rt"])
-                self.cpp_info.libdirs.append(str(self.options.mkl_library_path))
+                self.cpp_info.libdirs.append(str(
+                    self.options.mkl_library_path))
             else:
                 # This will work in both ubuntu and arch
                 self.cpp_info.libs.extend(["lapack", "blas"])
