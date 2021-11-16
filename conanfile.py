@@ -146,19 +146,19 @@ class ArmadilloConan(ConanFile):
                     self.cpp_info.libdirs.append(
                         "/usr/lib/x86_64-linux-gnu/hdf5/serial")
 
-                self.cpp_info.libs.extend(["hdf5"])
+                self.cpp_info.system_libs.extend(["hdf5"])
 
         else:
             self.cpp_info.defines.append("ARMA_DONT_USE_HDF5")
 
         if self.options.use_system_blas:
             if self.options.link_with_mkl:
-                self.cpp_info.libs.extend(["mkl_rt"])
+                self.cpp_info.system_libs.extend(["mkl_rt"])
                 self.cpp_info.libdirs.append(str(
                     self.options.mkl_library_path))
             else:
                 # This will work in both ubuntu and arch
-                self.cpp_info.libs.extend(["lapack", "blas"])
+                self.cpp_info.system_libs.extend(["lapack", "blas"])
 
     def package_id(self):
         self.info.header_only()
