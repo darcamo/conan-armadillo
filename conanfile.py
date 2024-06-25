@@ -16,19 +16,7 @@ class armadilloRecipe(ConanFile):  # noqa: D101
     description = "C++ library for linear algebra & scientific computing"
     topics = ("linear algebra", "scientific computing", "matrix", "vector")
 
-    # # Binary configuration
-    # settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "use_extern_rng": [True, False]
-    }
-    default_options = {
-        "use_extern_rng": False
-    }
-
     package_type = "header-library"
-
-    # def requirements(self):  # noqa: D102
-    #     self.requires("hdf5/[>=1.12.0]", transitive_headers=True)
 
     def source(self):  # noqa: D102
         get(self, self.conan_data['sources'][self.version], strip_root=True)
@@ -47,10 +35,6 @@ class armadilloRecipe(ConanFile):  # noqa: D101
         # self.cpp_info.defines.append("ARMA_USE_HDF5")
         self.cpp_info.defines.append("ARMA_DONT_USE_HDF5")
         self.cpp_info.defines.append("ARMA_DONT_USE_WRAPPER")
-        # self.cpp_info.libs = ["hdf5"]
-
-        if self.options.use_extern_rng:
-            self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")
 
     def package_id(self):  # noqa: D102
         self.info.clear()
